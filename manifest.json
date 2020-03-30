@@ -6,8 +6,6 @@
     "permissions": [
         "declarativeContent",
         "storage",
-        "activeTab",
-        "contextMenus",
         "bookmarks"
     ],
     "background": {
