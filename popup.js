@@ -2,16 +2,16 @@
 // crawl through children tree, and sort through _all_ bookmarks. Just do a flatMap
 // context menu
 
-let changeColor = document.getElementById('changeColor');
+// let changeColor = document.getElementById('changeColor');
 
-changeColor.onclick = async function (element) {
-    console.log(await grabAllBookmarkFolders());
-    // dumpBookmarks("Karen");
-};
+// changeColor.onclick = async function (element) {
+//     // li.append(dumpTreeNodes(bookmarkNode.children, query));
+//     // dumpBookmarks("Karen");
+// };
 
 // Traverse the bookmark tree, and print the folder and nodes.
-function dumpBookmarks(query) {
-    var bookmarkTreeNodes = chrome.bookmarks.getTree(
+function openRandom(query) {
+    chrome.bookmarks.getTree(
         function (bookmarkTreeNodes) {
             const queriedChildren = grabFolderNodes(query, bookmarkTreeNodes[0].children[0].children)[0].children
             queriedChildren.forEach(child => console.log(child));
@@ -46,117 +46,23 @@ function dumpTreeNodes(bookmarkNodes, query) {
     }
     return list;
 }
-function dumpNode(bookmarkNode, query) {
-    // console.log("asdf", bookmarkNode.title)
-    // console.log("asdf", bookmarkNode)
-    if (bookmarkNode.title) {
-        if (query && !bookmarkNode.children) {
-            if (String(bookmarkNode.title).indexOf(query) == -1) {
-                // console.log(bookmarkNode.title)
-                return;
-                // return $('<span></span>');
-            } else {
-                console.log('query', query, 'children', bookmarkNode.children, bookmarkNode.title)
-            }
-        }
-        console.log(bookmarkNode.title)
-        // var anchor = $('<a>');
-        // anchor.attr('href', bookmarkNode.url);
-        // anchor.text(bookmarkNode.title);
-        // /*
-        //  * When clicking on a bookmark in the extension, a new tab is fired with
-        //  * the bookmark url.
-        //  */
-        // anchor.click(function () {
-        //     chrome.tabs.create({ url: bookmarkNode.url });
-        // });
-        var span = $('<span>');
-        // var options = bookmarkNode.children ?
-        //     $('<span>[<a href="#" id="addlink">Add</a>]</span>') :
-        //     $('<span>[<a id="editlink" href="#">Edit</a> <a id="deletelink" ' +
-        //         'href="#">Delete</a>]</span>');
-        // var edit = bookmarkNode.children ? $('<table><tr><td>Name</td><td>' +
-        //     '<input id="title"></td></tr><tr><td>URL</td><td><input id="url">' +
-        //     '</td></tr></table>') : $('<input>');
-        // // Show add and edit links when hover over.
-        // span.hover(function () {
-        //     span.append(options);
-        //     $('#deletelink').click(function () {
-        //         $('#deletedialog').empty().dialog({
-        //             autoOpen: false,
-        //             title: 'Confirm Deletion',
-        //             resizable: false,
-        //             height: 140,
-        //             modal: true,
-        //             overlay: {
-        //                 backgroundColor: '#000',
-        //                 opacity: 0.5
-        //             },
-        //             buttons: {
-        //                 'Yes, Delete It!': function () {
-        //                     chrome.bookmarks.remove(String(bookmarkNode.id));
-        //                     span.parent().remove();
-        //                     $(this).dialog('destroy');
-        //                 },
-        //                 Cancel: function () {
-        //                     $(this).dialog('destroy');
-        //                 }
-        //             }
-        //         }).dialog('open');
-        //     });
-        //     $('#addlink').click(function () {
-        //         $('#adddialog').empty().append(edit).dialog({
-        //             autoOpen: false,
-        //             closeOnEscape: true, title: 'Add New Bookmark', modal: true,
-        //             buttons: {
-        //                 'Add': function () {
-        //                     chrome.bookmarks.create({
-        //                         parentId: bookmarkNode.id,
-        //                         title: $('#title').val(), url: $('#url').val()
-        //                     });
-        //                     $('#bookmarks').empty();
-        //                     $(this).dialog('destroy');
-        //                     window.dumpBookmarks();
-        //                 },
-        //                 'Cancel': function () {
-        //                     $(this).dialog('destroy');
-        //                 }
-        //             }
-        //         }).dialog('open');
-        //     });
-        //     $('#editlink').click(function () {
-        //         edit.val(anchor.text());
-        //         $('#editdialog').empty().append(edit).dialog({
-        //             autoOpen: false,
-        //             closeOnEscape: true, title: 'Edit Title', modal: true,
-        //             show: 'slide', buttons: {
-        //                 'Save': function () {
-        //                     chrome.bookmarks.update(String(bookmarkNode.id), {
-        //                         title: edit.val()
-        //                     });
-        //                     anchor.text(edit.val());
-        //                     options.show();
-        //                     $(this).dialog('destroy');
-        //                 },
-        //                 'Cancel': function () {
-        //                     $(this).dialog('destroy');
-        //                 }
-        //             }
-        //         }).dialog('open');
-        //     });
-        //     options.fadeIn();
-        // },
-        //     // unhover
-        //     function () {
-        //         options.remove();
-        //     }).append(anchor);
-    }
-    var li = $(bookmarkNode.title ? '<li>' : '<div>').append(span);
-    if (bookmarkNode.children && bookmarkNode.children.length > 0) {
-        li.append(dumpTreeNodes(bookmarkNode.children, query));
-    }
-    return li;
-}
-document.addEventListener('DOMContentLoaded', function () {
+
+document.addEventListener('DOMContentLoaded', async function () {
     // dumpBookmarks("Karen");
+    const results = await grabAllBookmarkFolders();
+    console.log(results);
+    results.forEach(result => {
+        $('#buttons').append(`<button class="bookmark" style="width: 200px" key="${result.title}">${result.title}</button>`);
+    });
+
+    const bookmarkButtons = document.getElementsByClassName('bookmark');
+    console.log(bookmarkButtons)
+
+    for (let item of bookmarkButtons) {
+        console.log(item);
+        item.onclick = async function (element) {
+            console.log(element.target, element.target.attributes.key.value);
+            openRandom(element.target.attributes.key.value);
+        }
+    }
 });
