@@ -1,28 +1,18 @@
-// import Math
+// TODO:
+// crawl through children tree, and sort through _all_ bookmarks. Just do a flatMap
+// context menu
+
 let changeColor = document.getElementById('changeColor');
 
-chrome.storage.sync.get('chooseColor', function (data) {
-    changeColor.style.backgroundColor = data.chooseColor;
-    changeColor.setAttribute('value', data.chooseColor);
-    // alert(data.chooseColor)
-});
-
-changeColor.onclick = function (element) {
-    let color = element.target.value;
-    // chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-    //     chrome.tabs.executeScript(
-    //         tabs[0].id,
-    //         { code: 'document.body.style.backgroundColor = "' + color + '";' });
-    // });
-    dumpBookmarks("Karen")
+changeColor.onclick = async function (element) {
+    console.log(await grabAllBookmarkFolders());
+    // dumpBookmarks("Karen");
 };
 
 // Traverse the bookmark tree, and print the folder and nodes.
 function dumpBookmarks(query) {
     var bookmarkTreeNodes = chrome.bookmarks.getTree(
         function (bookmarkTreeNodes) {
-            // console.log(bookmarkTreeNodes)
-            // console.log('allnodes', bookmarkTreeNodes[0].children[0].children)
             const queriedChildren = grabFolderNodes(query, bookmarkTreeNodes[0].children[0].children)[0].children
             queriedChildren.forEach(child => console.log(child));
 
@@ -31,13 +21,19 @@ function dumpBookmarks(query) {
             chrome.tabs.create({
                 url: randomChild.url
             })
+        }
+    );
+}
 
-        });
+async function grabAllBookmarkFolders() {
+    var bookmarkTreeNodes = await chrome.bookmarks.getTree()
+
+    const folders = bookmarkTreeNodes[0].children[0].children;
+    return folders.filter(node => node.children)
 }
 
 function grabFolderNodes(query, bookmarkNodes) {
     return bookmarkNodes.filter(node => {
-        // console.log('title', node.title, !query, String(node.title).toLowerCase().indexOf(query.toLowerCase()) !== -1)
         let hasQuery = !query || String(node.title).toLowerCase().indexOf(query.toLowerCase()) !== -1
         return node.children && hasQuery;
     })
